@@ -1,0 +1,16 @@
+@startuml
+title Диаграмма контекста приложения Умный Дом
+
+top to bottom direction
+
+!include C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь умного дома")
+
+System(FitLifeSystem, "система Умный Дом", "Приложение-монолит")
+System_Ext(api, "Temperature API", "Внешняя система получения температуры")
+
+Rel(user, FitLifeSystem, "Управление устройствами")
+Rel(FitLifeSystem, api,"Получение температуры")
+
+@enduml

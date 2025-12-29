@@ -1,0 +1,30 @@
+@startuml 
+!theme cerulean
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Пользователь умного дома")
+System_Ext(api, "Third-Party API", "REST API", "Внешнее Api для получения данных о температуре")
+
+System_Boundary(c0, "Система умный дом") {
+    Container(webapp, "Web Application", "JavaScript, Angular", "Интерфейс пользователя")
+    Container(apiGateway, "Api Gateway", "nginx", "Маршрутизация запросов к контейнерам")
+    Container(temperatureManager, "Temp. Manager", "Go, Python", "Управление температурой")
+    Container(deviceRegistry, "Devices Registry", "Go, Python", "Реестр устройств")
+    Container(gatesManager, "Gate Manager", "Go, Python", "Управление воротами")    
+    ContainerDb(database, "Database", "SQL", "Хранение данных")
+}
+
+Rel(user, webapp, "")
+Rel_R(webapp, apiGateway, "HTTPS")
+
+Rel(apiGateway, temperatureManager, "Проксирование запроса к микросервису")
+Rel(apiGateway, deviceRegistry, "Проксирование запроса к микросервису")
+Rel(apiGateway, gatesManager, "Проксирование запроса к микросервису")
+
+Rel(deviceRegistry, database, "Хранение \ чтение данных")
+Rel(gatesManager, database, "Чтение данных")
+Rel(temperatureManager, database, "Чтение данных")
+Rel_L(temperatureManager, api, "Отправка запросов к внешему сервису")
+
+
+@enduml
