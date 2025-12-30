@@ -1,0 +1,47 @@
+@startuml
+!theme cerulean
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Container(ui, "UI", "JavaScript, Vue.js", "Веб-приложение для обращения к API")
+Container(mobile, "Mobile App", "iOS, Andriod", "Мобильное приложение для обращения к API")
+
+System_Boundary(c0, "") {
+
+  System_Boundary(c1, "Компоненты backend-приложения") {
+    Container(deviceController, "Device Controller", "Python, Flask", "API-эндпоинты для управления устройствами")
+    Container(metricsController, "Metrics Controller", "Python, Flask", "API-эндпоинты для получения метрик")
+
+    Container(deviceService, "Device Service", "Python, Flask", "Бизнес-логика управления устройствами")
+    Container(metricsSevice, "Metrics Service", "Python, Flask", "Бизнес-логика получения метрик")
+
+    Container(bus, "Bus Service", "Python", "Работает с шиной данных")
+
+    Container(deviceRepository, "Device Repository", "Python, SQLAlchemy", "Слой для работы с базой данных")
+    Container(metricsRepository, "Metrics Repository", "Python, SQLAlchemy", "Слой для работы с базой данных")
+  }
+  
+  ContainerDb(database, "Database", "PostgreSQL", "Хранение данных устройств и состояний")
+  ContainerQueue(eventBus, "Event Bus", "RabbitMQ", "Обмен событиями (device.online, gate.opened)")
+}
+
+
+Rel(ui, deviceController, "Вызывает API", "HTTPS")
+Rel(ui, metricsController, "Вызывает API", "HTTPS")
+Rel(mobile, deviceController, "Вызывает API", "HTTPS")
+Rel(mobile, metricsController, "Вызывает API", "HTTPS")
+
+Rel(deviceController, deviceService, "Запрашивает данные или инициирует изменения")
+Rel(metricsController, metricsSevice, "Запрашивает данные")
+
+Rel_D(deviceService, bus, "Отправка уведомлений об изменнии оборудования")
+Rel_U(bus, metricsSevice, "Получение и обработка данных телеметрии")
+
+Rel(bus, eventBus, "Отправка \ получение команд")
+
+Rel(deviceService, deviceRepository, "SQL")
+Rel(metricsSevice, metricsRepository, "SQL")
+
+Rel_D(deviceRepository, database, "Пишет и читает в хранилище")
+Rel_D(metricsRepository, database, "Пишет и читает в хранилище")
+
+@enduml

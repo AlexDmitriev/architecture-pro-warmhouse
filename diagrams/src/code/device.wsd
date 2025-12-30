@@ -1,0 +1,58 @@
+@startuml
+
+class DeviceType {
+    +String name
+}
+
+class Location {
+    +String name
+}
+
+class Metric {
+    +String value
+    +Date addedAt
+}
+
+class Device {
+    +String serial
+    +Date lastUsedAt
+    +DeviceType type
+    +Location location
+    +List<Metric> metrics
+    +void addMetric()
+}
+
+class DeviceController {
+    DeviceService service
+    Validator validator
+    +String index()
+    
+}
+
+class Validator {
+    +bool validate()
+}
+
+class DeviceService {
+    DeviceRepository repository
+    +void create()
+    +void update()
+    +void delete()
+    +Device get()
+}
+
+class DeviceRepository {
+    +void save()
+    +void delete()
+    +Device get()
+    +List<Device> getAll()
+}
+
+
+Device "1" -- "0" DeviceType : has
+Device "1" -- "0" Location : has
+Device "1" -- "0..*" Metric : hasMany
+DeviceController "1" -- "0" DeviceService : has
+DeviceController "1" -- "0" Validator : has
+DeviceService "1" -- "0" DeviceRepository : has
+@enduml 
