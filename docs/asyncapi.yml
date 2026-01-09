@@ -7,7 +7,7 @@ info:
 servers:
   message-broker:
     host: rabbitmq:5672
-    protocol: rabbitmq
+    protocol: amqp
 
 channels:
   device.commands:
