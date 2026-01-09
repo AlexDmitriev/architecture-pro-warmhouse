@@ -13,11 +13,13 @@ System_Boundary(c0, "Система умный дом") {
     Container(apiGateway, "API Gateway", "nginx", "Маршрутизация запросов к микросервисам")
     
     System_Boundary(c1, "Микросервисы") {
-        Container(deviceRegistry, "Реестр устройств", "Go, Python", "Добавление, изменение устройств, получение телеметрии")
-        Container(heatingControl, "Управление отоплением", "Go, Python", "Управление температурой")
-        Container(lightingControl, "Управление освещением", "Go, Python", "Управление температурой")
-        Container(gatesControl, "Управление воротами", "Go, Python", "Управление воротами")
-        Container(homeMonitoring, "Наблюдение за домом", "Go, Python", "Управление воротами")
+        Container(auth, "Авторизация", "Go, Python", "Авторизация пользователя, получение JWT-токена для работы")
+        Container(deviceRegistry, "Реестр устройств", "Go, Python", "Добавление устройств в реестр, изменение устройств, получение телеметрии")
+        Container(telemetry, "Телеметрия", "Go, Python", "Получение телеметрии")
+        Container(heatingControl, "Управление отоплением", "Go, Python", "Управление датчиками")
+        Container(lightingControl, "Управление освещением", "Go, Python", "Управление датчиками")
+        Container(gatesControl, "Управление воротами", "Go, Python", "Управление приводами ворот")
+        Container(homeMonitoring, "Наблюдение за домом", "Go, Python", "Получение изображений или потока видео в реальном времени")
     }
     
     System_Boundary(c2, "Системы хранения и обмена данными") {

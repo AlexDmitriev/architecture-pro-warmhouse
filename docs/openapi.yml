@@ -9,15 +9,19 @@ info:
     Токен передается в заголовке: `Authorization: Bearer <jwt_token>`
 
 servers:
-  - url: https://api.smarthome.local
+  - url: https://api.smarthome.local  
     description: Хост системы
 
 security:
   - JWTAuth: []
 
 tags:
+  - name: authorization
+    description: Авторизация пользователей
   - name: registry
     description: Реестр устройств
+  - name: telemetry
+    description: Получение телеметрии с устройств  
   - name: heating
     description: Управление системой отопления
   - name: lighting
@@ -28,6 +32,58 @@ tags:
     description: Получение данных с систем мониторинга
 
 paths:
+  /api/v1/auth:
+    post:
+      summary: Авторизация пользователя
+      operationId: authenticateUser
+      tags:
+        - authorization
+      security: []  # Отключаем JWT для этого эндпоинта
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/AuthorizationError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+  /api/v1/telemetry/{serial_number}:
+    get:
+      summary: Получить телеметрию устройства по серийному номеру
+      operationId: getDeviceTelemetry
+      tags:
+        - telemetry
+      parameters:
+        - name: serial_number
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Серийный номер устройства
+      responses:
+        '200':
+          description: Телеметрия успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
   /api/v1/registry:
     get:
       summary: Получить список устройств
@@ -243,6 +299,49 @@ components:
       bearerFormat: JWT
 
   schemas:
+    AuthRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT-токен авторизации
+        expired_at:
+          type: integer
+          description: Время истечения токена в timestamp
+          example: 1735693200
+      required:
+        - token
+        - expired_at
+
+    TelemetryResponse:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Значение телеметрии (например, "22.5°C")
+        status:
+          type: string
+          description: Статус устройства
+        timestamp:
+          type: integer
+          description: Время получения данных в timestamp
+          example: 1735689600
+      required:
+        - value
+        - status
+        - timestamp
+
     Device:
       type: object
       properties:
@@ -377,6 +476,17 @@ components:
         - image
 
   responses:
+    AuthorizationError:
+      description: Неверные логин или пароль
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: InvalidCredentials
+
     UnauthorizedError:
       description: Неавторизованный доступ — отсутствует или недействителен JWT-токен
       content:

@@ -9,6 +9,7 @@ System_Boundary(c0, "") {
 
   System_Boundary(c1, "Компоненты backend-приложения") {
     Container(apiController, "API Controller", "Python, Flask", "API-эндпоинты для управления устройствами")
+    Container(authService, "Auth Service", "Python, Flask", "Валидация JWT-токена")
     Container(deviceService, "Device Service", "Python, Flask", "Бизнес-логика управления устройствами")
     Container(deviceClient, "Device Client", "Python", "Отправляет команды на устройство")
     Container(bus, "Bus Service", "Python", "Работает с шиной данных")
@@ -21,10 +22,11 @@ System_Boundary(c0, "") {
 
 System_Ext(device, "Устройство", "Физические устройства в домах")
 
-Rel(ui, apiController, "Вызывает API", "HTTPS")
-Rel(mobile, apiController, "Вызывает API", "HTTPS")
+Rel(ui, apiController, "Вызывает API, передает JWT-токен", "HTTPS")
+Rel(mobile, apiController, "Вызывает API, передает JWT-токен", "HTTPS")
 
-Rel(apiController, deviceService, "Обрабатывает команды ")
+Rel(apiController, authService, "Валидация JWT-токена, получение пользователя")
+Rel(apiController, deviceService, "Обрабатывает команды")
 
 Rel_D(deviceService, bus, "Получение информации об устройствах, Отправка телеметрии")
 Rel(deviceService, deviceRepository, "SQL")

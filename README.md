@@ -48,6 +48,7 @@
 **Диаграмма компонентов (Components)**
 
 [Реестр оборуования](diagrams/out/component/registry.png)
+[Телеметрия](diagrams/out/component/telemetry.png)
 [Управление устройством](diagrams/out/component/device.png)
 
 **Диаграмма кода (Code)**
