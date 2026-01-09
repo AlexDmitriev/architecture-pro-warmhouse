@@ -1,0 +1,58 @@
+@startuml
+
+entity User as "Пользователь" {
+  id: UUID <<key>>
+  username: STRING
+  password: STRING
+  full_name: STRING
+  registered_at: TIMESTAMP
+  last_activity_at: TIMESTAMP
+}
+
+entity House as "Дом" {
+  id: UUID <<key>>
+  user_id: UUID
+  address: STRING
+  created_at: TIMESTAMP
+  updated_at: TIMESTAMP 
+}
+
+entity Location as "Комната" {
+  id: UUID <<key>>
+  house_id: UUID
+  name: STRING
+  created_at: TIMESTAMP
+  updated_at: TIMESTAMP 
+}
+
+entity DeviceType as "Тип устройства" {
+  id: UUID <<key>>
+  code: STRING
+  name: STRING 
+}
+
+entity Device as "Устройство" {
+  id: UUID <<key>>
+  location_id: UUID 
+  device_type_id: UUID
+  name: STRING 
+  serial_number: STRING
+  status: STRING
+  created_at: TIMESTAMP
+  last_activity_at: TIMESTAMP 
+}
+
+entity TelemetryData as "Телеметрия" {
+  id: UUID <<key>>
+  device_id: UUID 
+  value: STRING
+  created_at: TIMESTAMP
+}
+
+User ||--o{ House : "принадлежит"
+House ||--o{ Location : "содержит"
+Location ||--o{ Device : "находится в"
+DeviceType ||--o{ Device : "имеет тип" 
+Device ||--o{ TelemetryData : "отправляет"
+
+@enduml
