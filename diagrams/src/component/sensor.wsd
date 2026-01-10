@@ -10,31 +10,30 @@ System_Boundary(c0, "") {
   System_Boundary(c1, "Компоненты backend-приложения") {
     Container(apiController, "API Controller", "Python, Flask", "API-эндпоинты для управления устройствами")
     Container(authService, "Auth Service", "Python, Flask", "Валидация JWT-токена")
-    Container(deviceService, "Device Service", "Python, Flask", "Бизнес-логика управления устройствами")
-    Container(deviceClient, "Device Client", "Python", "Отправляет команды на устройство")
+    Container(sensorService, "Sensor Service", "Python, Flask", "Бизнес-логика управления устройствами")
+    Container(sensorClient, "Sensor Client", "Python", "Отправляет команды на устройство")
     Container(bus, "Bus Service", "Python", "Работает с шиной данных")
-    Container(deviceRepository, "Device Repository", "Python, SQLAlchemy", "Слой для работы с базой данных")
+    Container(sensorRepository, "Sensor Repository", "Python, SQLAlchemy", "Слой для работы с базой данных")
   }
   
   ContainerDb(database, "Database", "PostgreSQL", "Хранение данных устройств и состояний")
-  ContainerQueue(eventBus, "Event Bus", "RabbitMQ", "Обмен событиями (device.online, gate.opened)")
+  ContainerQueue(eventBus, "Event Bus", "RabbitMQ", "Обмен событиями (sensor.online, gate.opened)")
 }
 
-System_Ext(device, "Устройство", "Физические устройства в домах")
+System_Ext(sensor, "Устройство", "Физические устройства в домах")
 
 Rel(ui, apiController, "Вызывает API, передает JWT-токен", "HTTPS")
 Rel(mobile, apiController, "Вызывает API, передает JWT-токен", "HTTPS")
 
 Rel(apiController, authService, "Валидация JWT-токена, получение пользователя")
-Rel(apiController, deviceService, "Обрабатывает команды")
+Rel(apiController, sensorService, "Обрабатывает команды")
 
-Rel_D(deviceService, bus, "Получение информации об устройствах, Отправка телеметрии")
-Rel(deviceService, deviceRepository, "SQL")
-Rel(deviceService, deviceClient, "Управление устройством")
-Rel_L(deviceClient, device, "Отправка команд на устройство")
+Rel_D(sensorService, bus, "Получение информации об устройствах, Отправка телеметрии")
+Rel(sensorService, sensorRepository, "SQL")
+Rel(sensorService, sensorClient, "Управление устройством")
+Rel_L(sensorClient, sensor, "Отправка команд на устройство")
 
 Rel(bus, eventBus, "Отправка \ получение команд в реестр устройств")
-Rel_D(deviceRepository, database, "Пишет и читает в хранилище")
-
+Rel_D(sensorRepository, database, "Пишет и читает в хранилище")
 
 @enduml

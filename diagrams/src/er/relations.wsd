@@ -25,16 +25,16 @@ entity Location as "Комната" {
   updated_at: TIMESTAMP 
 }
 
-entity DeviceType as "Тип устройства" {
+entity SensorType as "Тип устройства" {
   id: UUID <<key>>
   code: STRING
   name: STRING 
 }
 
-entity Device as "Устройство" {
+entity Sensor as "Устройство" {
   id: UUID <<key>>
   location_id: UUID 
-  device_type_id: UUID
+  sensor_type_id: UUID
   name: STRING 
   serial_number: STRING
   status: STRING
@@ -44,15 +44,15 @@ entity Device as "Устройство" {
 
 entity TelemetryData as "Телеметрия" {
   id: UUID <<key>>
-  device_id: UUID 
+  sensor_id: UUID
   value: STRING
   created_at: TIMESTAMP
 }
 
 User ||--o{ House : "принадлежит"
 House ||--o{ Location : "содержит"
-Location ||--o{ Device : "находится в"
-DeviceType ||--o{ Device : "имеет тип" 
-Device ||--o{ TelemetryData : "отправляет"
+Location ||--o{ Sensor : "находится в"
+SensorType ||--o{ Sensor : "имеет тип"
+Sensor ||--o{ TelemetryData : "отправляет"
 
 @enduml

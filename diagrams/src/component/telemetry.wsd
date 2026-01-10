@@ -27,7 +27,7 @@ Rel(metricsController, authService, "Валидация JWT-токена, пол
 Rel(metricsController, metricsSevice, "Запрашивает данные")
 
 Rel_U(bus, metricsSevice, "Получение и обработка данных телеметрии")
-Rel(bus, eventBus, "Отправка \ получение команд")
+Rel(eventBus, bus, "Отправка \ получение команд")
 
 Rel(metricsSevice, metricsRepository, "SQL")
 Rel_D(metricsRepository, database, "Пишет и читает в хранилище")

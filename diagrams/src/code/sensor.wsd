@@ -1,0 +1,57 @@
+@startuml
+
+class SensorType {
+    +String name
+}
+
+class Location {
+    +String name
+}
+
+class Metric {
+    +String value
+    +Date addedAt
+}
+
+class Sensor {
+    +String serial
+    +Date lastUsedAt
+    +SensorType type
+    +Location location
+    +List<Metric> metrics
+    +void addMetric()
+}
+
+class SensorController {
+    SensorService service
+    Validator validator
+    +String index()
+}
+
+class Validator {
+    +bool validate()
+}
+
+class SensorService {
+    SensorRepository repository
+    +void create()
+    +void update()
+    +void delete()
+    +Sensor get()
+}
+
+class SensorRepository {
+    +void save()
+    +void delete()
+    +Sensor get()
+    +List<Sensor> getAll()
+}
+
+
+Sensor "1" -- "0" SensorType : has
+Sensor "1" -- "0" Location : has
+Sensor "1" -- "0..*" Metric : hasMany
+SensorController "1" -- "0" SensorService : has
+SensorController "1" -- "0" Validator : has
+SensorService "1" -- "0" SensorRepository : has
+@enduml 
