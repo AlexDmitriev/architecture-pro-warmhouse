@@ -41,9 +41,52 @@ services:
         condition: service_started
     environment:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/%2f/messages
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_QUEUE=telemetry
     ports:
       - "8081:8081"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+  heating:
+    build:
+      context: ./heating
+      dockerfile: Dockerfile
+    container_name: heating-app
+    depends_on:
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_TELEMETRY_QUEUE=telemetry
+      - PORT=8082
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+  gates:
+    build:
+      context: ./gates
+      dockerfile: Dockerfile
+    container_name: gates-app
+    depends_on:
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_TELEMETRY_QUEUE=telemetry
+      - PORT=8083
+    ports:
+      - "8083:8083"
     restart: unless-stopped
     networks:
       - smarthome-network
