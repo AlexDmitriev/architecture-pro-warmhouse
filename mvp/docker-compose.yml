@@ -63,6 +63,7 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - RABBITMQ_TELEMETRY_QUEUE=telemetry
+      - RABBITMQ_SENSOR_QUEUE=sensors.heating
       - PORT=8082
     ports:
       - "8082:8082"
@@ -84,9 +85,32 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - RABBITMQ_TELEMETRY_QUEUE=telemetry
+      - RABBITMQ_SENSOR_QUEUE=sensors.gates
       - PORT=8083
     ports:
       - "8083:8083"
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+  monolith:
+    build:
+      context: ./monolith
+      dockerfile: Dockerfile
+    container_name: monolith-app
+    depends_on:
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_GATES_QUEUE=sensors.gates
+      - RABBITMQ_HEATING_QUEUE=sensors.heating
+      - PORT=8080
+    ports:
+      - "8080:8080"
     restart: unless-stopped
     networks:
       - smarthome-network

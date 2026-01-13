@@ -1,4 +1,4 @@
-module gates
+module monolith
 
 go 1.24.0
 

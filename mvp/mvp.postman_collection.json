@@ -1,0 +1,43 @@
+{
+	"info": {
+		"_postman_id": "902d3e12-fa3c-4353-a3b0-dfd2d3e5a24b",
+		"name": "mvp",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3119802",
+		"_collection_link": "https://mega-team-6721.postman.co/workspace/architect~7f2ab0c0-acef-432c-8332-fb950d0f97d5/collection/3119802-902d3e12-fa3c-4353-a3b0-dfd2d3e5a24b?action=share&source=collection_link&creator=3119802"
+	},
+	"item": [
+		{
+			"name": "telemetry",
+			"item": [
+				{
+					"name": "health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "monolith",
+			"item": []
+		},
+		{
+			"name": "heating",
+			"item": []
+		}
+	]
+}

@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"heating/db"
 	"heating/models"
@@ -25,6 +28,11 @@ func main() {
 		log.Fatal("RABBITMQ_URL environment variable is required")
 	}
 
+	sensorQueueName := os.Getenv("RABBITMQ_SENSOR_QUEUE")
+	if sensorQueueName == "" {
+		sensorQueueName = "sensors.heating"
+	}
+
 	telemetryQueueName := os.Getenv("RABBITMQ_TELEMETRY_QUEUE")
 	if telemetryQueueName == "" {
 		telemetryQueueName = "telemetry" // значение по умолчанию
@@ -43,6 +51,21 @@ func main() {
 		log.Fatalf("Failed to create RabbitMQ publisher: %v", err)
 	}
 	defer publisher.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sensorConsumer, err := rabbitmq.NewConsumer(rabbitmqURL, sensorQueueName, database)
+	if err != nil {
+		log.Fatalf("Failed to create sensor consumer: %v", err)
+	}
+	defer sensorConsumer.Close()
+
+	go func() {
+		if err := sensorConsumer.Start(ctx); err != nil && err != context.Canceled {
+			log.Printf("Sensor consumer error: %v", err)
+		}
+	}()
 
 	// Настраиваем HTTP сервер
 	r := gin.Default()
@@ -121,7 +144,22 @@ func main() {
 	if port == "" {
 		port = "8082"
 	}
-	if err := r.Run(":" + port); err != nil {
-		log.Printf("HTTP server error: %v", err)
+
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- r.Run(":" + port)
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	select {
+	case sig := <-sigChan:
+		log.Printf("Shutting down due to signal: %v", sig)
+		cancel()
+	case err := <-serverErr:
+		if err != nil {
+			log.Printf("HTTP server error: %v", err)
+		}
 	}
 }

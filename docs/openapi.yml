@@ -18,7 +18,7 @@ security:
 tags:
   - name: authorization
     description: Авторизация пользователей
-  - name: registry
+  - name: sensors
     description: Реестр устройств
   - name: telemetry
     description: Получение телеметрии с устройств  
@@ -60,7 +60,7 @@ paths:
   /api/v1/telemetry/{serial_number}:
     get:
       summary: Получить телеметрию устройства по серийному номеру
-      operationId: getDeviceTelemetry
+      operationId: getSensorTelemetry
       tags:
         - telemetry
       parameters:
@@ -84,12 +84,12 @@ paths:
         default:
           $ref: '#/components/responses/GeneralError'
 
-  /api/v1/registry:
+  /api/v1/sensors:
     get:
       summary: Получить список устройств
-      operationId: getDevices
+      operationId: getSensors
       tags:
-        - registry
+        - sensors
       responses:
         '200':
           description: Список устройств
@@ -98,7 +98,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Device'
+                  $ref: '#/components/schemas/Sensor'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         default:
@@ -106,22 +106,22 @@ paths:
 
     post:
       summary: Добавить новое устройство
-      operationId: createDevice
+      operationId: createSensor
       tags:
-        - registry
+        - sensors
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeviceCreate'
+              $ref: '#/components/schemas/SensorCreate'
       responses:
         '201':
           description: Устройство успешно создано
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Device'
+                $ref: '#/components/schemas/Sensor'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '422':
@@ -131,22 +131,22 @@ paths:
 
     put:
       summary: Обновить устройство
-      operationId: updateDevice
+      operationId: updateSensor
       tags:
-        - registry
+        - sensors
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeviceUpdate'
+              $ref: '#/components/schemas/SensorUpdate'
       responses:
         '200':
           description: Устройство успешно обновлено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Device'
+                $ref: '#/components/schemas/Sensor'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
@@ -158,15 +158,15 @@ paths:
 
     delete:
       summary: Удалить устройство
-      operationId: deleteDevice
+      operationId: deleteSensor
       tags:
-        - registry
+        - sensors
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeviceDelete'  
+              $ref: '#/components/schemas/SensorDelete'  
       responses:
         '204':
           description: Устройство успешно удалено
@@ -342,7 +342,7 @@ components:
         - status
         - timestamp
 
-    Device:
+    Sensor:
       type: object
       properties:
         location_id:
@@ -367,7 +367,7 @@ components:
         - serial_number
         - status
 
-    DeviceCreate:
+    SensorCreate:
       type: object
       properties:
         location_id:
@@ -384,7 +384,7 @@ components:
         - serial_number
         - status
 
-    DeviceUpdate:
+    SensorUpdate:
       type: object
       properties:
         serial_number:
@@ -403,7 +403,7 @@ components:
       required:
         - serial_number
 
-    DeviceDelete:
+    SensorDelete:
       type: object
       properties:
         serial_number:
@@ -507,7 +507,7 @@ components:
             properties:
               error:
                 type: string
-                example: Device not found
+                example: Sensor not found
 
     UnprocessableEntityError:
       description: Некорректные данные запроса (например, недопустимый статус, температура вне диапазона)
