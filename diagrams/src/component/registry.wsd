@@ -1,0 +1,35 @@
+@startuml
+!theme cerulean
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Container(ui, "UI", "JavaScript, Vue.js", "Веб-приложение для обращения к API")
+Container(mobile, "Mobile App", "iOS, Android", "Мобильное приложение для обращения к API")
+
+System_Boundary(c0, "") {
+
+  System_Boundary(c1, "Компоненты backend-приложения") {
+    Container(sensorRegistryController, "SensorRegistry Controller", "Python, Flask", "API-эндпоинты для управления устройствами")
+    Container(sensorRegistryService, "SensorRegistry Service", "Python, Flask", "Бизнес-логика управления устройствами")
+    Container(authService, "Auth Service", "Python, Flask", "Валидация JWT-токена")
+    Container(bus, "Bus Service", "Python", "Работает с шиной данных")
+    Container(sensorRepository, "Sensor Repository", "Python, SQLAlchemy", "Слой для работы с базой данных")
+  }
+  
+  ContainerDb(database, "Database", "PostgreSQL", "Хранение данных устройств и состояний")
+  ContainerQueue(eventBus, "Event Bus", "RabbitMQ", "Обмен событиями (sensor.online, gate.opened)")
+}
+
+
+Rel(ui, sensorRegistryController, "Вызывает API, передает JWT-токен", "HTTPS")
+Rel(mobile, sensorRegistryController, "Вызывает API, передает JWT-токен", "HTTPS")
+Rel(sensorRegistryController, authService, "Валидация JWT-токена и получения пользователя")
+Rel(sensorRegistryController, sensorRegistryService, "Запрашивает данные или инициирует изменения")
+
+Rel_D(sensorRegistryService, bus, "Отправка уведомлений о добавлении\изменении оборудования")
+
+Rel(bus, eventBus, "Отправка \ получение команд")
+
+Rel(sensorRegistryService, sensorRepository, "SQL")
+
+Rel_D(sensorRepository, database, "Пишет и читает в хранилище")
+@enduml

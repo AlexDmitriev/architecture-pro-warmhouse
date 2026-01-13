@@ -1,0 +1,43 @@
+@startuml
+!theme cerulean
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Пользователь умного дома")
+Person(support, "Тех. поддержка", "Специалист компании")
+
+System_Ext(temperatureApi, "Temperature Api", "REST Api", "Api для получения данных о температуре")
+System_Ext(extDevice, "Device Api", "Физические устройства умного дома", "Api для управления устройствами")
+
+System_Boundary(c0, "Система умный дом") {
+    Container(webapp, "Web Application", "JavaScript, Vue.js", "Интерфейс пользователя")
+    Container(apiGateway, "API Gateway", "nginx", "Маршрутизация запросов к микросервисам")
+    
+    System_Boundary(c1, "Микросервисы") {
+        Container(auth, "Авторизация", "Go, Python", "Авторизация пользователя, получение JWT-токена для работы")
+        Container(deviceRegistry, "Реестр устройств", "Go, Python", "Добавление устройств в реестр, изменение устройств, получение телеметрии")
+        Container(telemetry, "Телеметрия", "Go, Python", "Получение телеметрии")
+        Container(heatingControl, "Управление отоплением", "Go, Python", "Управление датчиками")
+        Container(lightingControl, "Управление освещением", "Go, Python", "Управление датчиками")
+        Container(gatesControl, "Управление воротами", "Go, Python", "Управление приводами ворот")
+        Container(homeMonitoring, "Наблюдение за домом", "Go, Python", "Получение изображений или потока видео в реальном времени")
+    }
+    
+    System_Boundary(c2, "Системы хранения и обмена данными") {
+        ContainerDb(database, "Database", "PostgreSQL", "Хранение данных устройств и состояний")
+        ContainerQueue(eventBus, "Event Bus", "Redis Streams", "Обмен событиями (device.online, gate.opened)")
+    }
+}
+
+Rel(user, webapp, "Использует UI", "HTTPS")
+Rel(support, webapp, "Использует UI", "HTTPS")
+Rel_R(webapp, apiGateway, "Вызывает API", "HTTPS")
+
+Rel_D(apiGateway, c1, "→ /api/*", "HTTP")
+
+Rel(c1, database, "Микросервисы: чтение/запись", "SQL")
+Rel(c1, eventBus, "Микросервисы: публикация/подписка", "Pub/Sub")
+
+Rel_L(heatingControl, temperatureApi, "Получает температуру", "HTTPS")
+Rel_R(c1, extDevice, "Управление устройствами")
+
+@enduml

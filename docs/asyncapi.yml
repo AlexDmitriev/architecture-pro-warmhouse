@@ -1,0 +1,102 @@
+asyncapi: 3.0.0
+info:
+  title: Реестр утройств, Управление Температурой
+  version: 1.0.0
+  description: Взаимодействие между микросервисами "Реестр Устройств" и "Управление Температурой"
+
+servers:
+  message-broker:
+    host: rabbitmq:5672
+    protocol: amqp
+
+channels:
+  device.commands:
+    description: Канал для команд от Реестра Устройств к Управлению Температурой
+    messages:
+      CreateDevice:
+        $ref: '#/components/messages/CreateDevice'
+      UpdateDevice:
+        $ref: '#/components/messages/UpdateDevice'
+
+  device.telemetry:
+    description: Канал для телеметрии от Управления Температурой к Реестру Устройств
+    messages:
+      DeviceTelemetry:
+        $ref: '#/components/messages/DeviceTelemetry'
+
+operations:
+  receiveDeviceCommands:
+    action: receive
+    channel:
+      $ref: '#/channels/device.commands'
+    summary: Управление Температурой получает команды на создание/обновление устройств
+
+  sendDeviceTelemetry:
+    action: send
+    channel:
+      $ref: '#/channels/device.telemetry'
+    summary: Управление Температурой отправляет телеметрию в Реестр Устройств
+
+components:
+  messages:
+    CreateDevice:
+      name: CreateDevice
+      summary: Команда на добавление нового устройства
+      payload:
+        $ref: '#/components/schemas/CreateDevicePayload'
+
+    UpdateDevice:
+      name: UpdateDevice
+      summary: Команда на обновление устройства
+      payload:
+        $ref: '#/components/schemas/UpdateDevicePayload'
+
+    DeviceTelemetry:
+      name: DeviceTelemetry
+      summary: Данные телеметрии от устройства
+      payload:
+        $ref: '#/components/schemas/DeviceTelemetryPayload'
+
+  schemas:
+    CreateDevicePayload:
+      type: object
+      properties:
+        location_id:
+          type: string
+          description: Идентификатор команты в доме
+        serial_number:
+          type: string
+          description: Серийный номер устройства
+      required:
+        - location_id
+        - serial_number
+
+    UpdateDevicePayload:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: Серийный номер устройства
+        status:
+          type: string
+          description: Новый статус устройства
+      required:
+        - serial_number
+        - status
+
+    DeviceTelemetryPayload:
+      type: object
+      properties:
+        device_type:
+          type: string
+          description: Тип устройства (например, "heater")
+        status:
+          type: string
+          description: Текущий статус устройства
+        value:
+          type: number
+          description: Измеренное значение (например, температура в градусах)
+      required:
+        - device_type
+        - status
+        - value

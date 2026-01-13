@@ -1,0 +1,532 @@
+openapi: 3.1.0
+info:
+  title: Smart Home API
+  version: 1.0.0
+  description: |
+    API для управления устройствами умного дома.
+    
+    Все эндпоинты защищены JWT-авторизацией.  
+    Токен передается в заголовке: `Authorization: Bearer <jwt_token>`
+
+servers:
+  - url: https://api.smarthome.local  
+    description: Хост системы
+
+security:
+  - JWTAuth: []
+
+tags:
+  - name: authorization
+    description: Авторизация пользователей
+  - name: sensors
+    description: Реестр устройств
+  - name: telemetry
+    description: Получение телеметрии с устройств  
+  - name: heating
+    description: Управление системой отопления
+  - name: lighting
+    description: Управление освещением
+  - name: gates
+    description: Управление воротами
+  - name: monitoring
+    description: Получение данных с систем мониторинга
+
+paths:
+  /api/v1/auth:
+    post:
+      summary: Авторизация пользователя
+      operationId: authenticateUser
+      tags:
+        - authorization
+      security: []  # Отключаем JWT для этого эндпоинта
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/AuthorizationError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+  /api/v1/telemetry/{serial_number}:
+    get:
+      summary: Получить телеметрию устройства по серийному номеру
+      operationId: getSensorTelemetry
+      tags:
+        - telemetry
+      parameters:
+        - name: serial_number
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Серийный номер устройства
+      responses:
+        '200':
+          description: Телеметрия успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+  /api/v1/sensors:
+    get:
+      summary: Получить список устройств
+      operationId: getSensors
+      tags:
+        - sensors
+      responses:
+        '200':
+          description: Список устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sensor'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+    post:
+      summary: Добавить новое устройство
+      operationId: createSensor
+      tags:
+        - sensors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorCreate'
+      responses:
+        '201':
+          description: Устройство успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+    put:
+      summary: Обновить устройство
+      operationId: updateSensor
+      tags:
+        - sensors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorUpdate'
+      responses:
+        '200':
+          description: Устройство успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+    delete:
+      summary: Удалить устройство
+      operationId: deleteSensor
+      tags:
+        - sensors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorDelete'  
+      responses:
+        '204':
+          description: Устройство успешно удалено
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+  /api/v1/heating:
+    post:
+      summary: Установить температуру отопления
+      operationId: setHeatingTemperature
+      tags:
+        - heating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeatingRequest'
+      responses:
+        '200':
+          description: Температура успешно установлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+  /api/v1/lighting:
+    post:
+      summary: Управление освещением
+      operationId: setLightingStatus
+      tags:
+        - lighting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LightingRequest'
+      responses:
+        '200':
+          description: Статус освещения успешно изменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+  /api/v1/gates:
+    post:
+      summary: Управление воротами
+      operationId: setGatesStatus
+      tags:
+        - gates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GatesRequest'
+      responses:
+        '200':
+          description: Статус ворот успешно изменён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+  /api/v1/monitoring:
+    post:
+      summary: Получить изображение с камеры наблюдения
+      operationId: getMonitoringImage
+      tags:
+        - monitoring
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                location_id:
+                  type: string
+                  description: Идентификатор локации
+              required:
+                - location_id
+      responses:
+        '200':
+          description: Изображение успешно получено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          $ref: '#/components/responses/GeneralError'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT-токен авторизации
+        expired_at:
+          type: integer
+          description: Время истечения токена в timestamp
+          example: 1735693200
+      required:
+        - token
+        - expired_at
+
+    TelemetryResponse:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Значение телеметрии (например, "22.5°C")
+        status:
+          type: string
+          description: Статус устройства
+        timestamp:
+          type: integer
+          description: Время получения данных в timestamp
+          example: 1735689600
+      required:
+        - value
+        - status
+        - timestamp
+
+    Sensor:
+      type: object
+      properties:
+        location_id:
+          type: string
+          description: Идентификатор комнаты
+        name:
+          type: string
+          description: Название устройства
+        serial_number:
+          type: string
+          description: Серийный номер устройства
+        last_used_at:
+          type: integer
+          description: Время последнего использования в timestamp
+          example: 1735689600
+        status:
+          type: string
+          description: Статус устройства (например, active, inactive)
+      required:
+        - location_id
+        - name
+        - serial_number
+        - status
+
+    SensorCreate:
+      type: object
+      properties:
+        location_id:
+          type: string
+        name:
+          type: string
+        serial_number:
+          type: string
+        status:
+          type: string
+      required:
+        - location_id
+        - name
+        - serial_number
+        - status
+
+    SensorUpdate:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: Серийный номер устройства для обновления
+        location_id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        last_used_at:
+          type: integer
+          description: Время последнего использования (timestamp)
+          example: 1735689600
+      required:
+        - serial_number
+
+    SensorDelete:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: Серийный номер устройства для удаления
+      required:
+        - serial_number
+
+    HeatingRequest:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: Серийный номер термостата
+        temperature:
+          type: number
+          description: Температура в градусах Цельсия
+          minimum: 5
+          maximum: 25
+      required:
+        - serial_number
+        - temperature
+
+    LightingRequest:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: Серийный номер осветительного прибора
+        status:
+          type: string
+          enum: [on, off]
+          description: Статус освещения
+      required:
+        - serial_number
+        - status
+
+    GatesRequest:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: Серийный номер привода ворот
+        status:
+          type: string
+          enum: [open, close]
+          description: Статус ворот
+      required:
+        - serial_number
+        - status
+
+    ControlResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Command accepted
+
+    MonitoringResponse:
+      type: object
+      properties:
+        image:
+          type: string
+          format: byte
+          description: Изображение в формате base64
+      required:
+        - image
+
+  responses:
+    AuthorizationError:
+      description: Неверные логин или пароль
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: InvalidCredentials
+
+    UnauthorizedError:
+      description: Неавторизованный доступ — отсутствует или недействителен JWT-токен
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Unauthorized
+
+    NotFoundError:
+      description: Устройство с указанным serial_number не найдено
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Sensor not found
+
+    UnprocessableEntityError:
+      description: Некорректные данные запроса (например, недопустимый статус, температура вне диапазона)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Invalid temperature value
+
+    GeneralError:
+      description: Общая ошибка сервера или обработки запроса
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Internal server error
