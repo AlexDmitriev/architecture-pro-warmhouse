@@ -28,16 +28,170 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "telemetry",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/telemetry",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"telemetry"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "monolith",
-			"item": []
+			"item": [
+				{
+					"name": "health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sensors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/sensors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"sensors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create sensor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sensor 2\",\r\n    \"serial_number\": \"serial_2\",\r\n    \"status\": \"available\",\r\n    \"type\": \"heating\"    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/sensors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"sensors"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "heating",
-			"item": []
+			"item": [
+				{
+					"name": "health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get sensor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8083/gates/serial_1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"gates",
+								"serial_1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "set status",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"serial_number\": \"serial_1\",\r\n    \"status\": \"open\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8083/gates",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8083",
+							"path": [
+								"gates"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
